@@ -41,6 +41,15 @@ while 1:
             cv2.circle(img, (int(x), int(y)), int(radius),
                 (0, 255, 255), 2)
             cv2.circle(img, center, 5, (0, 0, 255), -1)
+
+            direction = ''
+            if x > 440:
+                direction = "to the right"
+            elif x < 200:
+                direction = "to the left"
+            else:
+                direction = 'straight ahead'
+            #approx distance by measuring radius
             distance = ''
             if radius > 110:
                 distance = "very close"
@@ -50,9 +59,10 @@ while 1:
                 distance = "not very close"
             else:
                 distance = "far"
-            print("I can see a ball!, it is  " + distance + ". Radius is " + str(radius))
+            print("I can see a ball!, it is  " + distance + " and " + direction)
             sd.putBoolean('SeeBall', True)
             sd.putNumber('BallRadius', radius)
+            sd.putString('BallDirection', direction)
 
     else:
         print("I cannot see a ball")
