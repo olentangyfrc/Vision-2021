@@ -58,7 +58,7 @@ while 1:
             if x > 440:
                 direction = "right"
             elif x < 200:
-                direction = "eft"
+                direction = "left"
             else:
                 direction = "center"
 
