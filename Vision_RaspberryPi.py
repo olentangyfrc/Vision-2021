@@ -1,6 +1,6 @@
 import time
 import imutils
-
+import datetime
 import cv2
 
 from networktables import NetworkTables
@@ -9,7 +9,7 @@ NetworkTables.initialize(server='192.168.1.193')
 sd = NetworkTables.getTable('SmartDashboard')
 
 
-time.sleep(2)
+time.sleep(5)
 
 #set color range of what to look for
 print("I am looking for a yellow ball")
@@ -56,11 +56,11 @@ while 1:
             # the numbers are pixels. image is 640x480, numbered 0 to 640 on the X axis.
             direction = ''
             if x > 440:
-                direction = "to the right"
+                direction = "right"
             elif x < 200:
-                direction = "to the left"
+                direction = "eft"
             else:
-                direction = 'straight ahead'
+                direction = "center"
 
 
             #approximate distance by measuring radius. The bigger the radius, the closer it is.
@@ -75,17 +75,18 @@ while 1:
                 distance = "far"
 
             #print to console what it sees
-            print("I can see a ball!, it is  " + distance + " and " + direction)
+            print("I can see a ball!, it is  " + distance + " and to the " + direction)
 
 
             #send to ShuffleBoard whether we see the object we're looking for, how far it is and which direction
             sd.putBoolean('SeeBall', True)
             sd.putNumber('BallRadius', radius)
             sd.putString('BallDirection', direction)
-
+            sd.putString('pitime', str(datetime.datetime.now()))
     else:
 
         #print to console that it does not see the object and send to Shuffleboard
         print("I cannot see a ball")
         sd.putBoolean('SeeBall', False)
+        sd.putString('pitime', str(datetime.datetime.now()))
 
