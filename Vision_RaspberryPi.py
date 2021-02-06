@@ -2,12 +2,12 @@ import time
 import imutils
 import datetime
 import cv2
+import math
 
 from networktables import NetworkTables
 
 NetworkTables.initialize(server='192.168.1.193')
 sd = NetworkTables.getTable('SmartDashboard')
-
 
 time.sleep(5)
 
@@ -54,15 +54,22 @@ while 1:
 
             #using the x, y of the center of the cicle, is the object to the left, right, or straight ahead from the camera?
             # the numbers are pixels. image is 640x480, numbered 0 to 640 on the X axis.
-            direction = ''
-            if x > 440:
-                direction = "right"
-            elif x < 200:
-                direction = "left"
-            else:
-                direction = "center"
-
-
+            direction = '';
+            double distOfSector = 640/7;
+            if (x < distOfSector)
+                direction = "far left";
+            elif (x < 2 * distOfSector)
+                direction = "left";
+            elif (x < 3 * distOfSector)
+                direction = "middle left";
+            elif (x < 4 * distOfSector)
+                direction = "middle";
+            elif (x < 5 * distOfSector)
+                direction = "middle right";
+            elif (x < 6 * distOfSector)
+                direction = "right";
+            elif (x < 7 * distOfSector)
+                direction = "far right";
             #approximate distance by measuring radius. The bigger the radius, the closer it is.
             distance = ''
             if radius > 110:
@@ -73,6 +80,10 @@ while 1:
                 distance = "not very close"
             else:
                 distance = "far"
+
+            #finds angle from center of x-axis, or 320, first converts to radians to use math.atan func, then convert
+            #back to degrees
+            double XangleFromCenter = (180 / math.pi) * math.atan((y / abs(320 - x) ) * (math.pi / 180));
 
             #print to console what it sees
             print("I can see a ball!, it is  " + distance + " and to the " + direction)
