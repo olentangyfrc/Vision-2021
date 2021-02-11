@@ -6,15 +6,15 @@ import math
 
 from networktables import NetworkTables
 
-NetworkTables.initialize(server='192.168.1.193')
+NetworkTables.initialize(server='192.168.46.144')
 sd = NetworkTables.getTable('SmartDashboard')
 
 time.sleep(5)
 
 #set color range of what to look for
 print("I am looking for a yellow ball")
-yellowLower = (20, 100, 100)
-yellowUpper = (30, 255, 255)
+yellowLower = (25, 170, 170)
+yellowUpper = (30, 265, 265)
 
 #load the camera image
 cap = cv2.VideoCapture(0)
