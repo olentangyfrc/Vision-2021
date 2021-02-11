@@ -5,7 +5,7 @@ import cv2
 
 from networktables import NetworkTables
 
-NetworkTables.initialize(server='192.168.46.144')
+NetworkTables.initialize(server='192.168.1.193')
 sd = NetworkTables.getTable('SmartDashboard')
 
 time.sleep(5)
@@ -15,7 +15,7 @@ def gstreamer_pipeline(
     capture_height=720,
     display_width=1280,
     display_height=720,
-    framerate=60,
+    framerate=30,
     flip_method=0,
 ):
     return (
@@ -38,13 +38,18 @@ def gstreamer_pipeline(
     )
 
 
+def SendtoNT(ballvisible, distance, direction):
+    sd.putBoolean('SeeBall', ballvisible)
+    sd.putNumber('BallDistance', distance)
+    sd.putString('BallDirection', direction)
+    sd.putString('CoprocessorTime', str(datetime.datetime.now()))
 
 
 
 # set color range of what to look for
 print("I am looking for a yellow ball")
-yellowLower = (20, 100, 100)
-yellowUpper = (30, 265, 265)
+yellowLower = (20, 110, 110)
+yellowUpper = (30, 255, 255)
 
 # load the camera image
 cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=0), cv2.CAP_GSTREAMER)
@@ -67,16 +72,22 @@ while 1:
 
     # if it sees a circular object that is yellow, do this
     if len(cnts) > 0:
-        print(len(cnts))
+       # print(len(cnts))
         c = max(cnts, key=cv2.contourArea)
 
         # draw a circle on the object we found
         ((x, y), radius) = cv2.minEnclosingCircle(c)
         M = cv2.moments(c)
 
+
+
+        if radius > 400:
+            print("Ball too close")
+            SendtoNT(True, .5, center)
         # set minimum size of circle
-        if radius > 100:
-            print("radius " + str(radius))
+
+        elif radius > 10:
+            #print("radius " + str(radius))
             cv2.circle(img, (int(x), int(y)), int(radius),
                        (0, 255, 255), 2)
             cv2.circle(img, center, 5, (0, 0, 255), -1)
@@ -84,36 +95,31 @@ while 1:
             # using the x, y of the center of the cicle, is the object to the left, right, or straight ahead from the camera?
             # the numbers are pixels. image is 640x480, numbered 0 to 640 on the X axis.
             direction = ''
-            if x > 440:
+            if x > 880:
                 direction = "right"
-            elif x < 200:
+            elif x < 400:
                 direction = "left"
             else:
                 direction = "center"
 
             # approximate distance by measuring radius. The bigger the radius, the closer it is.
-            distance = ''
-            if radius > 110:
-                distance = "very close"
-            elif radius > 85:
-                distance = "near"
-            elif radius > 20:
-                distance = "not very close"
-            else:
-                distance = "far"
+            distance = round(380/radius, 2)
 
             # print to console what it sees
-            print("I can see a ball!, it is  " + distance + " and to the " + direction)
+            print("I can see a ball! It is approximately " + str(distance) + " feet away and to the " + direction)
 
             # send to ShuffleBoard whether we see the object we're looking for, how far it is and which direction
-            sd.putBoolean('SeeBall', True)
-            sd.putNumber('BallRadius', radius)
-            sd.putString('BallDirection', direction)
-            sd.putString('pitime', str(datetime.datetime.now()))
+            SendtoNT(True, distance, direction)
+            #sd.putBoolean('SeeBall', True)
+            #sd.putNumber('BallDistance', distance)
+            #sd.putString('BallDirection', direction)
+            #sd.putString('CoprocessorTime', str(datetime.datetime.now()))
     else:
 
         # print to console that it does not see the object and send to Shuffleboard
         print("I cannot see a ball")
-        sd.putBoolean('SeeBall', False)
-        sd.putString('pitime', str(datetime.datetime.now()))
-
+        SendtoNT(False, 0, "unknown")
+        #sd.putBoolean('SeeBall', False)
+        #sd.putString('CoprocessorTime', str(datetime.datetime.now()))
+#    cv2.imshow('img', mask)
+#    k = cv2.waitKey(1)
