@@ -5,7 +5,7 @@ import cv2
 
 from networktables import NetworkTables
 
-NetworkTables.initialize(server='192.168.1.193')
+NetworkTables.initialize(server='192.168.46.144')
 sd = NetworkTables.getTable('SmartDashboard')
 
 time.sleep(5)
