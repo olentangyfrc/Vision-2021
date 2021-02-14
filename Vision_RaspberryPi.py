@@ -5,8 +5,8 @@ import cv2
 
 from networktables import NetworkTables
 
-NetworkTables.initialize(server='192.168.46.144')
-sd = NetworkTables.getTable('SmartDashboard')
+NetworkTables.initialize(server='10.46.11.2')
+sd = NetworkTables.getTable('Vision')
 
 time.sleep(3)
 
@@ -91,10 +91,10 @@ while 1:
             print("Ball too close")
             SendtoNT(True, .5, center)
         # set minimum size of circle
-        elif radius <= 20:
+        elif radius <= 25:
             SendtoNT(False, 0, "unknown")
             print("I cannot see a ball.")
-        elif radius > 20:
+        elif radius > 25:
             #print("radius " + str(radius))
             cv2.circle(img, (int(x), int(y)), int(radius),
                        (0, 255, 255), 2)
