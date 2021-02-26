@@ -38,11 +38,7 @@ def gstreamer_pipeline(
     )
 
 
-def SendtoNT(ballvisible, distance, direction):
-    sd.putBoolean('SeeBall', ballvisible)
-    sd.putNumber('BallDistance', distance)
-    sd.putString('BallDirection', direction)
-    sd.putString('CoprocessorTime', str(datetime.datetime.now()))
+
 
 
 
@@ -51,7 +47,23 @@ print("I am looking for a yellow ball")
 yellowLower = (20, 110, 110)
 yellowUpper = (30, 255, 255)
 
-# load the camera image
+#track previous distance/direction so only update on change
+last_distance = 0
+last_direction = ""
+last_time = ""
+new_time = ""
+
+#function to update network tables
+def SendtoNT(ballvisible, distance, direction):
+    global last_time
+    sd.putBoolean('SeeBall', ballvisible)
+    sd.putNumber('BallDistance', distance)
+    sd.putString('BallDirection', direction)
+    newtime = datetime.datetime.now().strftime("%H:%M:%S")
+    if last_time != newtime:
+        sd.putString(newtime)
+    last_time = newtime
+# load the camera imager
 cap = cv2.VideoCapture(0)
 cap.set(3,1280.0)
 cap.set(4,720.0)
@@ -111,13 +123,17 @@ while 1:
                 direction = "center"
 
             # approximate distance by measuring radius. The bigger the radius, the closer it is.
-            distance = round(380/radius, 2)
+            distance = round(355/radius, 1)
 
             # print to console what it sees
             print("I can see a ball! It is approximately " + str(distance) + " feet away and to the " + direction)
 
+            if distance == last_distance and direction == last_direction:
+                print("no change to direction or distance. Not updating")
+            else:
+                print("change to direction or distance. Updating.")
             # send to ShuffleBoard whether we see the object we're looking for, how far it is and which direction
-            SendtoNT(True, distance, direction)
+                SendtoNT(True, distance, direction)
             #sd.putBoolean('SeeBall', True)
             #sd.putNumber('BallDistance', distance)
             #sd.putString('BallDirection', direction)
